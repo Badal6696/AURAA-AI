@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { AuraWordmark } from "@/components/aura-logo";
 import { StarField } from "@/components/star-field";
 import cosmosImg from "@/assets/aura-cosmos.jpg";
@@ -56,11 +55,12 @@ function AuthPage() {
   const handleGoogle = async () => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/chat",
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + "/chat" },
       });
-      if (result.error) throw result.error;
-      if (!result.redirected) navigate({ to: "/chat" });
+      if (error) throw error;
+      // On success the browser navigates away to Google, so no further action needed here.
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Google sign-in failed");
       setLoading(false);
